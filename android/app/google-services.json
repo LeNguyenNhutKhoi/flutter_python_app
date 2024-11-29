@@ -1,0 +1,91 @@
+{
+  "project_info": {
+    "project_number": "600995924113",
+    "firebase_url": "https://flutterapp-eaaf3-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "flutterapp-eaaf3",
+    "storage_bucket": "flutterapp-eaaf3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600995924113:android:eac07a99c7a3311258d730",
+        "android_client_info": {
+          "package_name": "com.example.flupy"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600995924113-0anapvnou5sqrbuu5iig3mifee8cik5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD6g8WWhdMluhT6JdmvI88XIWxjn0SGbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600995924113-0anapvnou5sqrbuu5iig3mifee8cik5i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "600995924113-svc17grohn56phtbv3fm8i8h610kri60.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testmycamv2"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:600995924113:android:6aa21e33ec84842058d730",
+        "android_client_info": {
+          "package_name": "com.example.testmycamv2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "600995924113-1l034teshpfnhhunup36duc342q86b9h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.testmycamv2",
+            "certificate_hash": "30e087a179201ca172cdbc41758a012e46b56cbe"
+          }
+        },
+        {
+          "client_id": "600995924113-0anapvnou5sqrbuu5iig3mifee8cik5i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBD6g8WWhdMluhT6JdmvI88XIWxjn0SGbQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "600995924113-0anapvnou5sqrbuu5iig3mifee8cik5i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "600995924113-svc17grohn56phtbv3fm8i8h610kri60.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.testmycamv2"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
