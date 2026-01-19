@@ -1,0 +1,7 @@
+Flask
+opencv-python-headless
+numpy
+Pillow
+mediapipe
+tensorflow
+language-tool-python

@@ -1,0 +1,415 @@
+# # %%
+
+# # Import necessary libraries
+# import numpy as np
+# import os
+# import string
+# import mediapipe as mp
+# import cv2
+# from my_functions import *
+# import keyboard
+# from tensorflow.keras.models import load_model
+# import language_tool_python
+
+# # Set the path to the data directory
+# PATH = os.path.join('capture_data')
+
+# # Create an array of action labels by listing the contents of the data directory
+# actions = np.array(os.listdir(PATH))
+
+# # Load the trained model
+# model = load_model('train_model.keras')
+
+# # Create an instance of the grammar correction tool
+# tool = language_tool_python.LanguageToolPublicAPI('en-UK')
+
+# # Initialize the lists
+# sentence, keypoints, last_prediction, grammar, grammar_result = [], [], [], [], []
+
+# # Access the camera and check if the camera is opened successfully
+# cap = cv2.VideoCapture(0)
+# if not cap.isOpened():
+#     print("Cannot access camera.")
+#     exit()
+
+# # Create a holistic object for sign prediction
+# with mp.solutions.holistic.Holistic(min_detection_confidence=0.75, min_tracking_confidence=0.75) as holistic:
+#     # Run the loop while the camera is open
+#     while cap.isOpened():
+#         # Read a frame from the camera
+#         _, image = cap.read()
+#         # Process the image and obtain sign landmarks using image_process function from my_functions.py
+#         results = image_process(image, holistic)
+#         # Draw the sign landmarks on the image using draw_landmarks function from my_functions.py
+#         draw_landmarks(image, results)
+#         # Extract keypoints from the pose landmarks using keypoint_extraction function from my_functions.py
+#         keypoints.append(keypoint_extraction(results))
+
+#         # Check if 10 frames have been accumulated
+#         if len(keypoints) == 10:
+#             # Convert keypoints list to a numpy array
+#             keypoints = np.array(keypoints)
+#             # Make a prediction on the keypoints using the loaded model
+#             prediction = model.predict(keypoints[np.newaxis, :, :])
+#             # Clear the keypoints list for the next set of frames
+#             keypoints = []
+
+#             # Check if the maximum prediction value is above 0.9
+#             if np.amax(prediction) > 0.9:
+#                 # Check if the predicted sign is different from the previously predicted sign
+#                 if last_prediction != actions[np.argmax(prediction)]:
+#                     # Append the predicted sign to the sentence list
+#                     sentence.append(actions[np.argmax(prediction)])
+#                     # Record a new prediction to use it on the next cycle
+#                     last_prediction = actions[np.argmax(prediction)]
+
+#         # Limit the sentence length to 7 elements to make sure it fits on the screen
+#         if len(sentence) > 7:
+#             sentence = sentence[-7:]
+
+#         # Reset if the "Spacebar" is pressed
+#         if keyboard.is_pressed(' '):
+#             sentence, keypoints, last_prediction, grammar, grammar_result = [], [], [], [], []
+
+#         # Check if the list is not empty
+#         if sentence:
+#             # Capitalize the first word of the sentence
+#             sentence[0] = sentence[0].capitalize()
+
+#         # Check if the sentence has at least two elements
+#         if len(sentence) >= 2:
+#             # Check if the last element of the sentence belongs to the alphabet (lower or upper cases)
+#             if sentence[-1] in string.ascii_lowercase or sentence[-1] in string.ascii_uppercase:
+#                 # Check if the second last element of sentence belongs to the alphabet or is a new word
+#                 if sentence[-2] in string.ascii_lowercase or sentence[-2] in string.ascii_uppercase or (sentence[-2] not in actions and sentence[-2] not in list(x.capitalize() for x in actions)):
+#                     # Combine last two elements
+#                     sentence[-1] = sentence[-2] + sentence[-1]
+#                     sentence.pop(len(sentence) - 2)
+#                     sentence[-1] = sentence[-1].capitalize()
+
+#         # Perform grammar check if "Enter" is pressed
+#         if keyboard.is_pressed('enter'):
+#             # Record the words in the sentence list into a single string
+#             text = ' '.join(sentence)
+#             # Apply grammar correction tool and extract the corrected result
+#             grammar_result = tool.correct(text)
+
+#         if grammar_result:
+#             # Calculate the size of the text to be displayed and the X coordinate for centering the text on the image
+#             textsize = cv2.getTextSize(grammar_result, cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
+#             text_X_coord = (image.shape[1] - textsize[0]) // 2
+
+#             # Draw the sentence on the image
+#             cv2.putText(image, grammar_result, (text_X_coord, 470),
+#                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+#         else:
+#             # Calculate the size of the text to be displayed and the X coordinate for centering the text on the image
+#             textsize = cv2.getTextSize(' '.join(sentence), cv2.FONT_HERSHEY_SIMPLEX, 1, 2)[0]
+#             text_X_coord = (image.shape[1] - textsize[0]) // 2
+
+#             # Draw the sentence on the image
+#             cv2.putText(image, ' '.join(sentence), (text_X_coord, 470),
+#                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
+
+#         # Show the image on the display
+#         cv2.imshow('Camera', image)
+
+#         cv2.waitKey(1)
+
+#         # Check if the 'Camera' window was closed and break the loop
+#         if cv2.getWindowProperty('Camera',cv2.WND_PROP_VISIBLE) < 1:
+#             break
+
+#     # Release the camera and close all windows
+#     cap.release()
+#     cv2.destroyAllWindows()
+
+#     # Shut off the server
+#     tool.close()
+
+
+
+# model.py 
+
+# # %% Import necessary libraries
+# import numpy as np
+# import os
+# from sklearn.model_selection import train_test_split
+# from tensorflow.keras.utils import to_categorical
+# from itertools import product
+# from sklearn import metrics
+# from tensorflow.keras.models import Sequential
+# from tensorflow.keras.layers import LSTM, Dense
+# from tensorflow.keras.callbacks import TensorBoard, EarlyStopping
+# import datetime
+
+# # %% Set paths and parameters
+# # Path to the data directory
+# PATH = os.path.join('captured_data')
+
+# # Create an array of actions (sign labels) by listing the contents of the data directory
+# actions = np.array(os.listdir(PATH))
+
+# # Define the number of sequences and frames per sequence
+# sequences = 30
+# frames = 10
+
+# # Create a label map to map each action label to a numeric value
+# label_map = {label: num for num, label in enumerate(actions)}
+
+# # %% Load dataset
+# # Initialize empty lists to store landmarks and labels
+# landmarks, labels = [], []
+
+# # Iterate over actions and sequences to load landmarks and corresponding labels
+# for action, sequence in product(actions, range(sequences)):
+#     temp = []
+#     for frame in range(frames):
+#         npy = np.load(os.path.join(PATH, action, str(sequence), f"{frame}.npy"))
+#         temp.append(npy)
+#     landmarks.append(temp)
+#     labels.append(label_map[action])
+
+# # Convert landmarks and labels to numpy arrays
+# X = np.array(landmarks)
+# Y = to_categorical(labels).astype(int)
+
+# # Split the data into training and testing sets
+# X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size=0.10, random_state=42, stratify=Y)
+
+# # %% Define the model
+# model = Sequential([
+#     LSTM(32, return_sequences=True, activation='relu', input_shape=(frames, 126)),
+#     LSTM(64, return_sequences=True, activation='relu'),
+#     LSTM(32, return_sequences=False, activation='relu'),
+#     Dense(32, activation='relu'),
+#     Dense(actions.shape[0], activation='softmax')
+# ])
+
+# # Compile the model
+# model.compile(optimizer='Adam', loss='categorical_crossentropy', metrics=['categorical_accuracy'])
+
+# # %% Set up TensorBoard and EarlyStopping
+# log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+# tensorboard_callback = TensorBoard(log_dir=log_dir, histogram_freq=1)
+# early_stopping = EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
+
+# # %% Train the model
+# model.fit(
+#     X_train, 
+#     Y_train, 
+#     epochs=100, 
+#     validation_split=0.1, 
+#     callbacks=[tensorboard_callback, early_stopping],
+#     verbose=1
+# )
+
+# # %% Save the trained model
+# model.save('train_model.keras')  # Use .keras format for better compatibility
+
+# # %% Evaluate the model
+# # Make predictions on the test set
+# predictions = np.argmax(model.predict(X_test), axis=1)
+
+# # Get the true labels from the test set
+# test_labels = np.argmax(Y_test, axis=1)
+
+# # Calculate and print the accuracy
+# accuracy = metrics.accuracy_score(test_labels, predictions)
+# print(f"Test Accuracy: {accuracy:.2%}")
+
+# %% Launch TensorBoard (for local use, run this in the terminal)
+# tensorboard --logdir logs/fit
+
+
+
+
+# function.py
+
+# import mediapipe as mp
+# import cv2
+# import numpy as np
+
+# mp_holistic = mp.solutions.holistic # Holistic model
+# mp_drawing = mp.solutions.drawing_utils # Drawing utilities
+
+# def draw_landmarks(image, results):
+#     """
+#     Draw the landmarks on the image.
+
+#     Args:
+#         image (numpy.ndarray): The input image.
+#         results: The landmarks detected by Mediapipe.
+
+#     Returns:
+#         None
+#     """
+#     # Draw landmarks for left hand
+#     mp.solutions.drawing_utils.draw_landmarks(image, results.left_hand_landmarks, mp.solutions.holistic.HAND_CONNECTIONS)
+
+#     # Draw landmarks for right hand
+#     mp.solutions.drawing_utils.draw_landmarks(image, results.right_hand_landmarks, mp.solutions.holistic.HAND_CONNECTIONS)
+
+# def image_process(image, model):
+#     """
+#     Process the image and obtain sign landmarks.
+
+#     Args:
+#         image (numpy.ndarray): The input image.
+#         model: The Mediapipe holistic object.
+
+#     Returns:
+#         results: The processed results containing sign landmarks.
+#     """
+#     # Convert the image from BGR to RGB
+#     image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+#     # Set the image to read-only mode
+#     image.flags.writeable = False
+#     # Process the image using the model
+#     results = model.process(image)
+#     # Set the image back to writeable mode
+#     image.flags.writeable = True
+#     # Convert the image back from RGB to BGR
+#     image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+#     return results
+
+# def keypoint_extraction(results):
+#     """
+#     Extract the keypoints from the sign landmarks.
+
+#     Args:
+#         results: The processed results containing sign landmarks.
+
+#     Returns:
+#         keypoints (numpy.ndarray): The extracted keypoints.
+#     """
+#     # Extract the keypoints for the left hand if present, otherwise set to zeros
+#     lh = np.array([[res.x, res.y, res.z] for res in results.left_hand_landmarks.landmark]).flatten() if results.left_hand_landmarks else np.zeros(63)
+    
+#     # Extract the keypoints for the right hand if present, otherwise set to zeros
+#     rh = np.array([[res.x, res.y, res.z] for res in results.right_hand_landmarks.landmark]).flatten() if results.right_hand_landmarks else np.zeros(63)
+
+#     # Concatenate the keypoints for both hands
+#     keypoints = np.concatenate([lh, rh])
+#     return keypoints
+
+
+# dataCollection.py
+
+# import os
+# from my_functions import *
+# import numpy as np
+# import cv2
+# import mediapipe as mp
+# import time
+# from itertools import product  # Ensure product is correctly imported
+
+# # Define the actions (signs) that will be recorded and stored in the dataset
+# actions = np.array(['yes','no','hello','my','name'])
+
+# # Define the number of sequences and frames to be recorded for each action
+# sequences = 30
+# frames = 10
+
+# # Set the path where the dataset will be stored
+# PATH = os.path.join('captured_data')
+
+# # Create directories for each action, sequence, and frame in the dataset
+# for action, sequence in product(actions, range(sequences)):
+#     try:
+#         os.makedirs(os.path.join(PATH, action, str(sequence)))
+#     except:
+#         pass
+
+# # Access the camera and check if the camera is opened successfully
+# cap = cv2.VideoCapture(0)
+# if not cap.isOpened():
+#     print("Cannot access camera.")
+#     exit()
+
+# # Initialize capture toggle
+# capture_active = False
+
+# # Create a MediaPipe Holistic object for hand tracking and landmark extraction
+# with mp.solutions.holistic.Holistic(min_detection_confidence=0.75, min_tracking_confidence=0.75) as holistic:
+#     action_index = 0  # Current action index
+#     sequence = 0      # Current sequence index
+#     frame = 0         # Current frame index
+
+#     while True:
+#         _, image = cap.read()
+#         image = np.ascontiguousarray(image, dtype=np.uint8)  # Ensure writable array
+        
+#         # Process the image and draw landmarks
+#         results = image_process(image, holistic)
+#         draw_landmarks(image, results)
+
+#         # Display instructions
+#         if not capture_active:
+#             cv2.putText(image, 'Press SPACE to start capturing.', (20, 50), 
+#                         cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+#         else:
+#             cv2.putText(image, f'Capturing "{actions[action_index]}", Sequence: {sequence}, Frame: {frame}', 
+#                         (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+
+#         cv2.imshow('Camera', image)
+
+#         # Check for key press
+#         key = cv2.waitKey(1) & 0xFF
+#         if key == ord(' '):  # Spacebar toggles capture
+#             capture_active = not capture_active
+#             if capture_active:
+#                 print("Capture started.")
+#             else:
+#                 print("Capture stopped.")
+        
+#         if capture_active:
+#             # Capture and save frames every 1 second
+#             start_time = time.time()
+#             while capture_active:
+#                 _, image = cap.read()
+#                 image = np.ascontiguousarray(image, dtype=np.uint8)
+
+#                 # Process and save the image
+#                 results = image_process(image, holistic)
+#                 draw_landmarks(image, results)
+#                 frame_path = os.path.join(PATH, actions[action_index], str(sequence), str(frame))
+#                 keypoints = keypoint_extraction(results)
+#                 np.save(frame_path, keypoints)
+
+#                 # Display capture info
+#                 cv2.putText(image, f'Capturing "{actions[action_index]}", Sequence: {sequence}, Frame: {frame}', 
+#                             (20, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2, cv2.LINE_AA)
+#                 cv2.imshow('Camera', image)
+
+#                 # Wait for 1 second
+#                 elapsed_time = time.time() - start_time
+#                 while elapsed_time < 1:
+#                     elapsed_time = time.time() - start_time
+
+#                 # Increment frame count
+#                 frame += 1
+#                 if frame >= frames:  # Move to the next sequence after completing the frames
+#                     frame = 0
+#                     sequence += 1
+#                     if sequence >= sequences:  # Move to the next action
+#                         sequence = 0
+#                         action_index += 1
+#                         if action_index >= len(actions):  # End capturing if all actions are completed
+#                             capture_active = False
+#                             print("All actions captured.")
+#                             break
+#                 # Check for stop key (spacebar)
+#                 key = cv2.waitKey(1) & 0xFF
+#                 if key == ord(' '):
+#                     capture_active = False
+#                     print("Capture stopped.")
+
+#         # Stop the program if 'q' is pressed
+#         if key == ord('q'):
+#             print("Exiting.")
+#             break
+
+#     # Release the camera and close any remaining windows
+#     cap.release()
+#     cv2.destroyAllWindows()
