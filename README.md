@@ -1,7 +1,7 @@
 # AI Sign Language Translator App
 
 An AI-powered Sign Language Recognition application that captures hand gestures via camera, recognizes sign language using a deep learning model, and converts it into readable text in real time.  
-The project focuses on improving communication support for deaf and mute users using modern AI and mobile technologies.
+The project focuses on improving communication support for deaf and mute users using LLMs, Media Pipe model and Flutter mobile technologies.
 
 ---
 
