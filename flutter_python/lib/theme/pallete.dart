@@ -1,0 +1,228 @@
+// import 'package:flutter/material.dart';
+// import 'package:flutter_riverpod/flutter_riverpod.dart';
+// import 'package:shared_preferences/shared_preferences.dart';
+
+// final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeData>((ref) {
+//   return ThemeNotifier();
+// });
+
+// class Pallete {
+//   // Colors
+//   static const blackColor = Color.fromRGBO(1, 1, 1, 1); // primary color
+//   static const greyColor = Color.fromRGBO(26, 39, 45, 1); // secondary color
+//   static const drawerColor = Color.fromRGBO(18, 18, 18, 1);
+//   static const whiteColor = Colors.white;
+//   static var redColor = Colors.red.shade500;
+//   static var blueColor = Colors.blue.shade300;
+
+//   // Themes
+//   static var darkModeAppTheme = ThemeData.dark().copyWith(
+//     scaffoldBackgroundColor: blackColor,
+//     cardColor: greyColor,
+//     appBarTheme: const AppBarTheme(
+//       backgroundColor: drawerColor,
+//       iconTheme: IconThemeData(
+//         color: whiteColor,
+//       ),
+//     ),
+//     drawerTheme: const DrawerThemeData(
+//       backgroundColor: drawerColor,
+//     ),
+//     primaryColor: redColor,
+//     // colorScheme: ColorScheme(background: drawerColor), // will be used as alternative background color
+//     colorScheme: const ColorScheme(
+//       brightness: Brightness.dark, // or Brightness.dark
+//       primary: Colors.blue,
+//       onPrimary: Colors.white,
+//       secondary: Colors.green,
+//       onSecondary: Colors.white,
+//       error: Colors.red,
+//       onError: Colors.white,
+//       surface: Colors.grey,
+//       onSurface: Colors.black,
+//       background: drawerColor,
+//       onBackground: Colors.black,
+//     ),
+//   );
+
+//   static var lightModeAppTheme = ThemeData.light().copyWith(
+//     scaffoldBackgroundColor: whiteColor,
+//     cardColor: greyColor,
+//     appBarTheme: const AppBarTheme(
+//       backgroundColor: whiteColor,
+//       elevation: 0,
+//       iconTheme: IconThemeData(
+//         color: blackColor,
+//       ),
+//     ),
+//     drawerTheme: const DrawerThemeData(
+//       backgroundColor: whiteColor,
+//     ),
+//     primaryColor: redColor, 
+//     // colorScheme: ColorScheme(background: whiteColor),
+//     colorScheme: const ColorScheme(
+//       brightness: Brightness.light, // or Brightness.light
+//       primary: Colors.blue,
+//       onPrimary: Colors.white,
+//       secondary: Colors.green,
+//       onSecondary: Colors.white,
+//       error: Colors.red,
+//       onError: Colors.white,
+//       surface: Colors.grey,
+//       onSurface: Colors.black,
+//       background: whiteColor,
+//       onBackground: Colors.black,
+//     ),
+//   );
+// }
+
+// class ThemeNotifier extends StateNotifier<ThemeData> {
+//   ThemeMode _mode;
+//   ThemeNotifier({ThemeMode mode = ThemeMode.dark})
+//       : _mode = mode,
+//         super(
+//           Pallete.darkModeAppTheme,
+//         ) {
+//     getTheme();
+//   }
+
+//   ThemeMode get mode => _mode;
+
+//   void getTheme() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+//     final theme = prefs.getString('theme');
+
+//     if (theme == 'light') {
+//       _mode = ThemeMode.light;
+//       state = Pallete.lightModeAppTheme;
+//     } else {
+//       _mode = ThemeMode.dark;
+//       state = Pallete.darkModeAppTheme;
+//     }
+//   }
+
+//   void toggleTheme() async {
+//     SharedPreferences prefs = await SharedPreferences.getInstance();
+
+//     if (_mode == ThemeMode.dark) {
+//       _mode = ThemeMode.light;
+//       state = Pallete.lightModeAppTheme;
+//       prefs.setString('theme', 'light');
+//     } else {
+//       _mode = ThemeMode.dark;
+//       state = Pallete.darkModeAppTheme;
+//       prefs.setString('theme', 'dark');
+//     }
+//   }
+// }
+
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+final themeNotifierProvider = StateNotifierProvider<ThemeNotifier, ThemeData>((ref) {
+  return ThemeNotifier();
+});
+
+class Pallete {
+  // Colors
+  static const blackColor = Color.fromRGBO(1, 1, 1, 1); // primary color
+  static const greyColor = Color.fromRGBO(26, 39, 45, 1); // secondary color
+  static const drawerColor = Color.fromRGBO(18, 18, 18, 1);
+  static const whiteColor = Colors.white;
+  static var redColor = Colors.red.shade500;
+  static var blueColor = Colors.blue.shade300;
+
+  // Themes dark
+  static var darkModeAppTheme = ThemeData.dark().copyWith(
+    scaffoldBackgroundColor: blackColor,
+    cardColor: greyColor,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: blackColor,
+      iconTheme: IconThemeData(
+        color: whiteColor,
+      ),  
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: drawerColor,
+    ),
+    primaryColor: redColor,
+    colorScheme: const ColorScheme.dark().copyWith(
+      primary: Colors.blue,
+      onPrimary: Colors.white,
+      secondary: Colors.green,
+      onSecondary: Colors.white,
+      error: Colors.red,
+      onError: Colors.white,
+      surface: Colors.grey,
+      onSurface: Colors.black,
+    )
+  );
+
+  //Theme light
+  static var lightModeAppTheme = ThemeData.light().copyWith(
+    scaffoldBackgroundColor: whiteColor,
+    cardColor: greyColor,
+    appBarTheme: const AppBarTheme(
+      backgroundColor: whiteColor,
+      elevation: 0,
+      iconTheme: IconThemeData(
+        color: blackColor,
+      ),
+    ),
+    drawerTheme: const DrawerThemeData(
+      backgroundColor: whiteColor,
+    ),
+    primaryColor: redColor,
+    colorScheme: const ColorScheme.light().copyWith(
+      primary: Colors.blue,
+      onPrimary: Colors.white,
+      secondary: Colors.green,
+      onSecondary: Colors.white,
+      error: Colors.red,
+      onError: Colors.white,
+      surface: Colors.grey,
+      onSurface: Colors.black,
+    ),
+  );
+}
+
+class ThemeNotifier extends StateNotifier<ThemeData> {
+  ThemeMode _mode;
+  ThemeNotifier({ThemeMode mode = ThemeMode.dark})
+      : _mode = mode,
+        super(
+          Pallete.darkModeAppTheme,
+        ) {
+    getTheme();
+  }
+
+  ThemeMode get mode => _mode;
+
+  void getTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final theme = prefs.getString('theme');
+
+    if (theme == 'light') {
+      _mode = ThemeMode.light;
+      state = Pallete.lightModeAppTheme;
+    } else {
+      _mode = ThemeMode.dark;
+      state = Pallete.darkModeAppTheme;
+    }
+  }
+
+  void toggleTheme() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+
+    if (_mode == ThemeMode.dark) {
+      _mode = ThemeMode.light;
+      state = Pallete.lightModeAppTheme;
+      prefs.setString('theme', 'light');
+    } else {
+      _mode = ThemeMode.dark;
+      state = Pallete.darkModeAppTheme;
+      prefs.setString('theme', 'dark');
+    }
+  }
+}
